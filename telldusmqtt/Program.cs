@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Serilog;
+using telldusmqtt.Models;
+using telldusmqtt.Services;
 
 const string VersionArgs = "--version";
 const string SerilogOutputTemplate = "[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}";
@@ -33,15 +35,23 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(settings);
 
 Log.ForContext<Program>().Information("Starting TelldusMQTT {Version}", GetVersion());
 
+builder.Services.AddOptions<TelldusSettings>()
+    .Bind(builder.Configuration.GetSection(TelldusSettings.Section))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 builder.Services.AddSerilog((services, configuration) =>
 {
     configuration
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
-        .WriteTo.Console(outputTemplate: SerilogOutputTemplate)
-;
+        .WriteTo.Console(outputTemplate: SerilogOutputTemplate);
 });
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ITelldusClientService, TelldusClientService>();
+builder.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<ITelldusClientService>());
 
 IHost host = builder.Build();
 await host.RunAsync();

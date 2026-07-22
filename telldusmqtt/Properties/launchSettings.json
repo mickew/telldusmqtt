@@ -2,13 +2,17 @@
   "profiles": {
     "telldusmqtt": {
       "commandName": "Project",
+      //"commandLineArgs": "--version",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "NETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true
     },
     "Container (Dockerfile)": {
-      "commandName": "Docker"
+      "commandName": "Docker",
+      "environmentVariables": {
+        "NETCORE_ENVIRONMENT": "Development"
+      }
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"
