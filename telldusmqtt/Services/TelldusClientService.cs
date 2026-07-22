@@ -92,7 +92,7 @@ internal class TelldusClientService : ITelldusClientService, IDisposable
             var content = await response.Content.ReadAsStringAsync();
             try
             {
-                _sensors = System.Text.Json.JsonSerializer.Deserialize<Sensors>(content);
+                _sensors = JsonSerializer.Deserialize<Sensors>(content);
                 if (_sensors == null)
                 {
                     _logger.LogError("Deserialization of sensors returned null.");
@@ -104,7 +104,6 @@ internal class TelldusClientService : ITelldusClientService, IDisposable
                 _logger.LogError(ex, "Failed to deserialize sensors from Telldus API response.");
                 return false;
             }
-            // TODO: Do something with the sensors
             return true;
         }
         else

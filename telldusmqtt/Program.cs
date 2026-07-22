@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 using Serilog;
+using telldusmqtt.Jobs;
 using telldusmqtt.Models;
 using telldusmqtt.Services;
 
@@ -52,6 +53,27 @@ builder.Services.AddSerilog((services, configuration) =>
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ITelldusClientService, TelldusClientService>();
 builder.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<ITelldusClientService>());
+
+var everySeconds = builder.Configuration.GetValue<int?>("TelldusReadIntervalSeconds") ?? 30;
+
+
+builder.Services.AddQuartz(options =>
+{
+    var jobKey = new JobKey(nameof(GetTelldusStatusJob));
+    options
+        .AddJob<GetTelldusStatusJob>(jobKey, (IJobConfigurator job) => { }) // Explicitly specify the delegate type
+        .AddTrigger(trigger =>
+            trigger
+                .ForJob(jobKey)
+                .WithSimpleSchedule(schedule =>
+                    schedule.WithInterval(TimeSpan.FromSeconds(everySeconds)).RepeatForever()));
+});
+
+builder.Services.AddQuartzHostedService(options =>
+{
+    options.StartDelay = TimeSpan.FromSeconds(5);
+    options.WaitForJobsToComplete = true;
+});
 
 IHost host = builder.Build();
 await host.RunAsync();
