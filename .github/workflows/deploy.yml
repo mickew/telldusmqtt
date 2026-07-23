@@ -57,5 +57,5 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit: ${{ github.sha }}
         tag: "${{ github.event.inputs.environment_tag }}"
-        name: "Release of MQTT UPS Client ${{ github.event.inputs.environment_tag }}"
+        name: "Release of Telldus MQTT Client ${{ github.event.inputs.environment_tag }}"
         generateReleaseNotes: true
