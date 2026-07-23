@@ -14,7 +14,7 @@ latesturl="https://github.com/mickew/telldusmqtt/releases/latest"
 rooturl="https://github.com/mickew/telldusmqtt/releases/download"
 filename="release.zip"
 out="latest"
-JSON_FMT='{\"MQTT\": {\"Server\": \"%s\" }, \"NUT\": {\"Host\": \"%s\" }}\n'
+JSON_FMT='{\"MQTT\": {\"Server\": \"%s\" }, \"Telldus\": {\"Host\": \"%s\" , \"Username\": \"%s\" , \"Password\": \"%s\" }}\n'
 
 #Check parameters
 if [ $# -gt 0 ]; then
@@ -44,11 +44,13 @@ function install {
     if checkifinstalled; then
         if [ ! -f /usr/local/bin/$app_dir/appsettings.Production.json ]; then
             MQTTSERVER="$(whiptail --inputbox "Enter youre MQTT Server address!" --title "MQTT Server" 8 78 "" 3>&1 1>&2 2>&3)"
-            NUTSERVER="$(whiptail --inputbox "Enter youre NUT Server address!" --title "NUT Server" 8 78 "" 3>&1 1>&2 2>&3)"
+            TELLDUSSERVER="$(whiptail --inputbox "Enter youre Telldus Server address!" --title "Telldus Server" 8 78 "" 3>&1 1>&2 2>&3)"
+            TELLDUSUSER="$(whiptail --inputbox "Enter youre Telldus Live e-mail address!" --title "Telldus Server" 8 78 "" 3>&1 1>&2 2>&3)"
+            TELLDUSPW="$(whiptail --inputbox "Enter youre Telldus Live password!" --title "Telldus Server" 8 78 "" 3>&1 1>&2 2>&3)"
         fi
-        if [[ -n "$MQTTSERVER" && -n "$NUTSERVER" ]]; then
+        if [[ -n "$MQTTSERVER" && -n "$TELLDUSSERVER" && -n "$TELLDUSUSER" && -n "$TELLDUSPW" ]]; then
             getlatest
-            sudo sh -c "printf \"$JSON_FMT\" \"$MQTTSERVER\" \"$NUTSERVER\" >> /usr/local/bin/$app_dir/appsettings.Production.json"
+            sudo sh -c "printf \"$JSON_FMT\" \"$MQTTSERVER\" \"$TELLDUSSERVER\" \"$TELLDUSUSER\ \"$TELLDUSPW\"" >> /usr/local/bin/$app_dir/appsettings.Production.json"
             chmod +x $install_dir/$app
             if [[ $service != "" ]]; then
                 systemctl enable $service
@@ -59,8 +61,14 @@ function install {
             if [[ -z "$MQTTSERVER" ]]; then
                 whiptail --title "$application_name" --msgbox "No MQTT Server address entered, can't install." 8 78
             fi
-            if [[ -z "$NUTSERVER" ]]; then
-                whiptail --title "$application_name" --msgbox "No NUT Server address entered, can't install." 8 78
+            if [[ -z "$TELLDUSSERVER" ]]; then
+                whiptail --title "$application_name" --msgbox "No Telldus Server address entered, can't install." 8 78
+            fi
+            if [[ -z "$TELLDUSUSER" ]]; then
+                whiptail --title "$application_name" --msgbox "No Telldus Live e-mail address entered, can't install." 8 78
+            fi
+            if [[ -z "$TELLDUSPW" ]]; then
+                whiptail --title "$application_name" --msgbox "No Telldus Live password entered, can't install." 8 78
             fi
         fi
 
