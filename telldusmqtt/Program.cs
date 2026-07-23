@@ -41,6 +41,11 @@ builder.Services.AddOptions<TelldusSettings>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddOptions<MqttSettings>()
+    .BindConfiguration(MqttSettings.Section)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 builder.Services.AddSerilog((services, configuration) =>
 {
     configuration
@@ -53,6 +58,8 @@ builder.Services.AddSerilog((services, configuration) =>
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ITelldusClientService, TelldusClientService>();
 builder.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<ITelldusClientService>());
+builder.Services.AddSingleton<IMqttClientService, MqttClientService>();
+builder.Services.AddHostedService(serviceProvider => (IMqttClientService)serviceProvider.GetRequiredService<IMqttClientService>());
 
 var everySeconds = builder.Configuration.GetValue<int?>("TelldusReadIntervalSeconds") ?? 30;
 

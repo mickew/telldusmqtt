@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Quartz;
 using telldusmqtt.Models;
 using telldusmqtt.Services;
@@ -12,11 +9,13 @@ internal class GetTelldusStatusJob : IJob
 {
     private readonly ILogger<GetTelldusStatusJob> _logger;
     private readonly ITelldusClientService _telldusClientService;
+    private readonly IMqttClientService _mqttClientService;
 
-    public GetTelldusStatusJob(ILogger<GetTelldusStatusJob> logger, ITelldusClientService telldusClientService)
+    public GetTelldusStatusJob(ILogger<GetTelldusStatusJob> logger, ITelldusClientService telldusClientService, IMqttClientService mqttClientService)
     {
         _logger = logger;
         _telldusClientService = telldusClientService;
+        _mqttClientService = mqttClientService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -26,7 +25,18 @@ internal class GetTelldusStatusJob : IJob
         // Call the TelldusClientService to get the status
         var (lastReadingOk, sensors) = await GetTelldusStatusAsync(context.CancellationToken);
 
-        _logger.LogDebug("Telldus status: {Status}", sensors);
+        if (lastReadingOk)
+        {
+            if (await _mqttClientService.IsConnectedAsync)
+            {
+                await _mqttClientService.PublishStatusAsync(sensors);
+            }
+            else
+            {
+                _logger.LogWarning("MQTT client is not connected. Skipping publish.");
+
+            }
+        }
     }
 
     private async Task<(bool lastReadingOk, Sensors sensors)> GetTelldusStatusAsync(CancellationToken cancellationToken)
