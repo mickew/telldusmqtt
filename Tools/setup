@@ -50,7 +50,7 @@ function install {
         fi
         if [[ -n "$MQTTSERVER" && -n "$TELLDUSSERVER" && -n "$TELLDUSUSER" && -n "$TELLDUSPW" ]]; then
             getlatest
-            sudo sh -c "printf \"$JSON_FMT\" \"$MQTTSERVER\" \"$TELLDUSSERVER\" \"$TELLDUSUSER\ \"$TELLDUSPW\"" >> /usr/local/bin/$app_dir/appsettings.Production.json"
+            sudo sh -c "printf \"$JSON_FMT\" \"$MQTTSERVER\" \"$TELLDUSSERVER\" \"$TELLDUSUSER\" \"$TELLDUSPW\" > /usr/local/bin/$app_dir/appsettings.Production.json"
             chmod +x $install_dir/$app
             if [[ $service != "" ]]; then
                 systemctl enable $service
