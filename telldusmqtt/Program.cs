@@ -68,7 +68,7 @@ builder.Services.AddQuartz(options =>
 {
     var jobKey = new JobKey(nameof(GetTelldusStatusJob));
     options
-        .AddJob<GetTelldusStatusJob>(jobKey, (IJobConfigurator job) => { }) // Explicitly specify the delegate type
+        .AddJob<GetTelldusStatusJob>(job => job.WithIdentity(jobKey))
         .AddTrigger(trigger =>
             trigger
                 .ForJob(jobKey)

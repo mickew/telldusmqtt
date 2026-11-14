@@ -18,12 +18,12 @@ internal class GetTelldusStatusJob : IJob
         _mqttClientService = mqttClientService;
     }
 
-    public async Task Execute(IJobExecutionContext context)
+    public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Executing GetTelldusStatusJob at {Time}", DateTimeOffset.Now);
 
         // Call the TelldusClientService to get the status
-        var (lastReadingOk, sensors) = await GetTelldusStatusAsync(context.CancellationToken);
+        var (lastReadingOk, sensors) = await GetTelldusStatusAsync(cancellationToken);
 
         if (lastReadingOk)
         {
@@ -34,7 +34,6 @@ internal class GetTelldusStatusJob : IJob
             else
             {
                 _logger.LogWarning("MQTT client is not connected. Skipping publish.");
-
             }
         }
     }
